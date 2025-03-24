@@ -1,1 +1,15 @@
-Hello World
+---
+# front matter tells Jekyll to process Liquid
+---
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Home</title>
+  </head>
+  <body>
+    <h1>{{ "Hello World!" | downcase }}</h1>
+    <h2>{{ "hi" | capitalize }}</h2>
+  </body>
+</html>
