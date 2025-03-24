@@ -2,7 +2,23 @@
 # front matter tells Jekyll to process Liquid
 
 layout: default
-title: Home
+title: Axel Belin - Portfolio
 ---
 
-<h1>{{ "Hello World!" | downcase }}</h1>
+<section>
+    <h1>{{ "Hello World!" | downcase }}</h1>
+    <p>TODO Write an introduction text here ...</p>
+</section>
+
+<section>
+    <h1>Read more about my experience: </h1>
+
+    <ul>
+    {% for post in site.posts %}
+        <li>
+        <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
+        {{ post.excerpt }}
+        </li>
+    {% endfor %}
+    </ul>
+</section>
