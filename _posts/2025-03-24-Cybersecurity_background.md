@@ -1,13 +1,21 @@
 ---
 # front matter tells Jekyll to process Liquid
 
-layout: post
 title: Cybersecurity background
-author: Axel Belin
-excerpt: Testttttttt
+date: 2025-03-25
+excerpt: An overview of my professionnal, academic and personnal background in cybersecurity
 ---
 
 I’m a software engineer with an appetence for cybersecurity. I’m improving my knowledge whenever I can, especially by developing skills as part of the projects I’m contributing. My engineering education and professional experience have enabled me to understand cybersecurity issues and contribute to enhancing the security of the projects I work on.
 This page shows an overview of my experiences involving cybersecurity knowledge and skills.
+
+# TOTO
+
+## Tata
+
+### Tutu
+
+***bold***
+*italic*
 
 ...
