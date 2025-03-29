@@ -1,0 +1,393 @@
+RFC: UGEGreed Distributed Computing Protocol
+
+Version 3.1.0 - 06/17/2023
+
+Table of Contents
+
+    Introduction
+
+    1.1. Objective
+
+    1.2. General Conventions
+
+    1.2.1. Writing Conventions
+
+    1.2.2. Frame Conventions
+
+    1.3. Terminology / Glossary
+
+    General Operation
+
+    Protocol Operation with Examples
+
+    3.1. Initialization and Network Connection
+
+    3.1.1. Connection Management on the CHILD Side
+
+    3.1.2. Connection Management on the PARENT Side
+
+    3.1.3. Routing Table Update Management
+
+    3.2. Task Distribution
+
+    3.2.1. Task Description
+
+    3.2.2. Calculation Assignment Negotiation
+
+    3.2.3. Calculation Responses
+
+    3.3. Application Disconnection
+
+    3.3.1. Disconnection as Seen by the Application Attempting to Disconnect (CHILD)
+
+    3.3.2. Disconnection as Seen by the Parent Application (PARENT)
+
+    3.3.3. Disconnection as Seen by the Child Applications (Fi)
+
+    3.3.4. Disconnection as Seen by the Rest of the Network
+
+    Known Problems
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+1. Introduction
+
+**1.1. Objective**
+
+    UGEGreed is an application designed to implement a distributed computing system on top of the TCP protocol. [cite: 16] The application allows the user to distribute a calculation to other connected machines. [cite: 17] These calculations are provided by a JAR file. [cite: 17] The purpose of the application is to accelerate computation by utilizing the power of multiple machines. [cite: 18] The RFC will present the general operation of the application, then the details with examples of each case, and finally, define the content of the packet types used in the application. [cite: 19]
+    
+**1.2. General Conventions**
+
+    **1.2.1. Writing Conventions**
+    
+        Integers (INT) over 4 bytes signed and longs (LONG) over 8 bytes signed are all transmitted in BigEndian. [cite: 21] Signed bytes will be designated by (BYTE) and byte strings by (BYTES). [cite: 22] Character strings (STRING) are encoded in UTF-8 and preceded by the size of their representation in bytes over an INT. [cite: 23, 24]
+        
+        STRING = size (INT) string encoded in UTF-8. [cite: 24]
+        
+        An IP address (IPADDRESS) is represented by a byte with a value of 4 or 6, depending on whether the address is in IPv4 or IPv6 format, followed by the 4 bytes or 16 bytes of the address, depending on whether it is IPv4 or IPv6. [cite: 24, 25] A socket address (SOCKETADDRESS) containing an IP address and a port number is represented by an IPADDRESS followed by an INT with a value between 0 and 65,535. [cite: 25]
+        
+        SOCKETADDRESS = IP address (IPADDRESS) + port number between 0 and 65,535 (INT). [cite: 25]
+        
+        HTTP URLs (HTTP-URL) reference STRINGs that follow RFC 4248 for URLs for the HTTP scheme. [cite: 26, 27] Identifiers (ID) will simply be (SOCKETADDRESS). [cite: 27]
+        
+        Identifier lists (LIST\_ID) will be sent in the following format: an INT giving the number of identifiers in the list, followed by the identifiers of the list in (ID) format. [cite: 27, 28]
+        
+    **1.2.2. Frame Conventions**
+    
+        The frames that will be exchanged on the network will be of 3 types: LOCAL, TRANSFER, and BROADCAST. [cite: 28, 29, 30, 31, 32] LOCAL frames will be exchanged between neighboring applications in the network. [cite: 29, 30, 31, 32] TRANSFER frames will be transferred from a source application to a destination application by the different applications located on the (minimal length) path between the source application and the destination application. [cite: 29, 30, 31, 32] BROADCAST frames will be transferred to all applications in the network from a source application. [cite: 29, 30, 31, 32] All UGEGreed protocol frames begin with a signed byte called the routing byte, which can have a value of 0 (LOCAL), 1 (TRANSFER), or 2 (BROADCAST). [cite: 32, 33, 34, 35, 36]
+        
+        They follow one of the following three general formats:
+        
+        LOCAL: 0 (BYTE) opcode (BYTE) payload (BYTES)
+        
+        TRANSFER: 1 (BYTE) opcode (BYTE) payload (BYTES)
+        
+        BROADCAST: 2 (BYTE) opcode (BYTE) payload (BYTES)
+        
+        In all cases:
+        
+        -   opcode is a signed byte that indicates the type of command; [cite: 33, 34, 35, 36]
+        -   id\_src is the ID of the machine sending the command; [cite: 33, 34, 35, 36]
+        -   id\_dst is the ID of the destination machine of the command; [cite: 33, 34, 35, 36]
+        -   payload is the command sent by the source machine. [cite: 33, 34, 35, 36]
+        
+**1.3. Terminology**
+
+    In this RFC, several terms will be used. [cite: 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54] This section provides a definition for each term. [cite: 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+    
+    * application
+        
+        The application (UGEGreed) is a program developed in JAVA by Axel BELIN and Thomas VELU based on the TCP protocol. [cite: 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+        
+    * tree
+        
+        A network of machines connected to each other. [cite: 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+        
+    * JAR file
+        
+        A file containing compiled JAVA code. [cite: 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+        
+    * child
+        
+        A machine that has connected to the port of another machine. [cite: 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+        
+        In a tree:
+        
+        A B and C are the children of A. [cite: 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+        
+        / \
+        
+        B C
+        
+    * machine
+        
+        Instance of the application started on an IP address and a port of a machine. [cite: 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+        
+    * node
+        
+        Symbolic representation of a machine in the tree. [cite: 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+        
+    * op/ops (operators)
+        
+        This is the type of a packet. [cite: 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+        
+        Each packet type has its OPS. [cite: 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+        
+        For example: The OPS of a CONNECTOR packet is 0. [cite: 46, 47, 48, 49, 50, 51, 52, 53, 54]
+        
+    * packet
+        
+        Data sent through the TCP protocol containing information (calculations, states, various, etc.). [cite: 46, 47, 48, 49, 50, 51, 52, 53, 54]
+        
+    * parent
+        
+        A machine that receives the connection from another machine on its port. [cite: 47, 48, 49, 50, 51, 52, 53, 54]
+        
+        In a tree:
+        
+        A A is the parent of B and C. [cite: 48, 49, 50, 51, 52, 53, 54]
+        
+        / \
+        
+        B C
+        
+    * weight
+        
+        The number of machines connected to a node (we also count the node). [cite: 49, 50, 51, 52, 53, 54]
+        
+    * network
+        
+        System grouping the machines that have successfully launched the application and are connected to each other via TCP. [cite: 50, 51, 52, 53, 54]
+        
+        The connection to a machine on the network must be made on a reserved port between 6666 and 9999. [cite: 50, 51, 52, 53, 54]
+        
+    * root
+        
+        The first machine in the network. [cite: 51, 52, 53, 54]
+        
+    * socket
+        
+        The IPv(4/6) address / port pair. [cite: 52, 53, 54]
+        
+    * subtree
+        
+        In a tree:
+        
+        A Nodes B, D, and E make up a subtree; there is a parent and at least one child. [cite: 53, 54]
+        
+        / \
+        
+        B C
+        
+        / \
+        
+        D E
+        
+    * distributed computing system
+        
+        Process allowing a calculation to be done on multiple machines. [cite: 54, 55]
+        
+    * routing table
+        
+        Element that indicates for each application in the network which of its neighbors is the closest to this application (the notion of distance is simply the length of the shortest path in the tree). [cite: 55, 56, 57, 58, 59]
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+2. General Operation
+
+The user sends a JAR and a range of values. [cite: 56, 57, 58, 59] The range of values will be distributed recursively to all available machines. [cite: 56, 57, 58, 59] To do this, the application that sent the calculation will request a response from the other applications to find out if they are ready to receive it. [cite: 57, 58, 59] As soon as the calculations are sent, each application will perform the calculation that was given to it and then send a packet containing the response to the one that gave the calculation. [cite: 59, 60, 61, 62] In cases of disconnection:
+
+* A non-ROOT application: It can only disconnect if it has finished its calculations. [cite: 60, 61, 62]
+* A ROOT application: For consistency, it cannot disconnect. [cite: 60, 61, 62]
+
+The machines form a tree of this type, for example:
+
+A
+
+/ \
+
+B C
+
+/ \ \
+
+D E F
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+3. Protocol Operation with Examples
+
+Subsections 3.1 to 3.3 provide detailed explanations with simple usage examples. [cite: 63, 64, 65]
+
+**3.1. Initialization and Connection to the Network**
+
+    When an application is started in ROOT mode. [cite: 63, 64, 65] Its routing table is initially empty. [cite: 63, 64, 65] We will present the connection of a CHILD application to a PARENT application. [cite: 64, 65, 66, 67, 68, 69, 70, 71] The connection is initiated by CHILD by connecting to the listening port of PARENT. [cite: 64, 65, 66, 67, 68, 69, 70, 71]
+    
+    **3.1.1. Connection Management on the CHILD Side**
+    
+        The CHILD application started in CONNECTED mode connects to a PARENT application, it sends the following LOCAL frame with opcode 1:
+        
+        CONNECT = LOCAL(0) (BYTE) 1 (BYTE) id (ID)
+        
+        where id is the identifier of CHILD. [cite: 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79]
+        
+        -> If the PARENT application refuses the connection (especially if it is in the process of disconnecting), it will respond with the frame:
+        
+        CONNECT\_KO = LOCAL(0) (BYTE) 2
+        
+        In this case, the application has failed to connect to the network. [cite: 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79]
+        
+        -> If the PARENT application accepts the connection, it will respond with the frame:
+        
+        CONNECT\_OK = LOCAL(0) (BYTE) 3 (BYTE) id\_mother (ID) ids (LIST\_ID)
+        
+        where:
+        
+        -   id\_mother is the identifier of the PARENT application; [cite: 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79]
+        -   the list of identifiers of all the applications present in the routing table of PARENT. [cite: 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79]
+        
+        The application will be able to construct its routing table by associating id\_mother with all the identifiers it has received and by associating id\_mother with id\_mother. [cite: 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79] Once the CONNECT\_OK frame is received and the routing table is updated, the application can accept connections on its listening port. [cite: 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79]
+        
+    **3.1.2. Connection Management on the PARENT Side**
+    
+        If an application accepts a connection on its listening port, it expects a CONNECT or RECONNECT frame, with the exception of all other frames. [cite: 72, 73, 74, 75, 76, 77, 78, 79]
+        
+        -> If it receives a frame from a CHILD application:
+        
+        CONNECT = LOCAL(0) (BYTE) 1 (BYTE) id\_daughter (ID)
+        
+        where id\_daughter is the identifier of the CHILD application. [cite: 72, 73, 74, 75, 76, 77, 78, 79]
+        
+        -> If the application refuses the connection (especially if it is in the process of disconnecting), it will respond with the frame:
+        
+        CONNECT\_KO = LOCAL(0) (BYTE) 2 [cite: 72, 73, 74, 75, 76, 77, 78, 79]
+        
+        If the PARENT application accepts the connection, it will respond with the frame:
+        
+        CONNECT\_OK = LOCAL(0) (BYTE) 3 (BYTE) id (ID) ids (LIST\_ID)
+        
+        where:
+        
+        -   id is the identifier of the application; [cite: 74, 75, 76, 77, 78, 79]
+        -   the list of identifiers present in the routing table. [cite: 74, 75, 76, 77, 78, 79]
+        
+        Then, it will add the association id\_daughter -> id\_daughter in its routing table and associate the id\_daughter with the TCP connection on which it received this frame. [cite: 76, 77, 78, 79] It will then send a BROADCAST frame to all its neighbors (except CHILD):
+        
+        ADD\_NODE = BROADCAST (1) (BYTE) 4 (BYTE) id (ID) id\_daughter [cite: 76, 77, 78, 79]
+        
+    **3.1.3. Routing Table Update Management**
+    
+        When an application receives a frame from one of its neighbors with identifier id\_src:
+        
+        ADD\_NODE = BROADCAST (1) (BYTE) 4 (BYTE) id (ID) id\_daughter
+        
+        It will add the association id\_daughter -> id\_src to its routing table. [cite: 78, 79] It will also broadcast the frame in accordance with Section 3. [cite: 78, 79, 80, 81, 82, 83]
+        
+**3.2. Task Distribution**
+
+    The UGEGreed protocol does not impose any particular algorithm for the distribution of calculation tasks. [cite: 80, 81, 82, 83, 84, 85, 86, 87] It simply provides a mechanism by which one application can ask another how many calculation units it can perform for it. [cite: 80, 81, 82, 83, 84, 85, 86, 87] It allows calculation units to be assigned to an application and for an application to return responses for calculation units performed that have been assigned to it. [cite: 81, 82, 83, 84, 85, 86, 87] The different applications implementing the UGEGreed protocol can freely choose the algorithm they use to distribute the UCs in the network. [cite: 82, 83, 84, 85, 86, 87]
+    
+    **3.2.1. Task Description**
+    
+        A checker (CHECKER) is described by the URL of a JAR containing a class implementing the interface fr.uge.ugegreed.Checker located at the address "igm.univ-mlv.fr/coursprogreseau/tds/projet2023/Checker.java" as well as the fully-qualified name of this class:
+        
+        CHECKER = url (HTTP-URL) fully-qualifier-name (CLASS)
+        
+        A calculation is a pair formed by a value to be tested (LONG) and a checker. [cite: 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101] We will manipulate ranges of values to be tested (RANGE) which will be composed of two values (LONG) with the first less than or equal to the second. [cite: 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101] The bounds are included in the range of values. [cite: 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101]
+        
+        RANGE = inf (LONG) sup (LONG)
+        
+        A list of RANGE (LIST\_RANGES) will be sent with an INT giving the size of the list followed by the ranges of the list. [cite: 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101]
+        
+    **3.2.2. Calculation Assignment Negotiation**
+    
+        An SRC application (with identifier id\_src) can propose calculations on the same checker to a DST application (with identifier id\_dst) by sending a frame (see Section 3):
+        
+        WORK\_REQUEST = TRANSFERT(1) (BYTE) 5 (BYTE) id\_dst (ID) id\_src (ID) request\_id (LONG) checker (CHECKER) total\_range (RANGE) nb\_uc (LONG)
+        
+        where:
+        
+        -   id\_src is the identifier of the ID\_SRC application; [cite: 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101]
+        -   id\_dst is the identifier of the ID\_DST application; [cite: 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101]
+        -   request\_id is a request identifier that must be unique for this application and that will be used in the response as well as in the assignment; [cite: 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101]
+        -   checker is the checker used for this task; [cite: 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101]
+        -   total\_range is the total range of values that will be tested; [cite: 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101]
+        -   nb\_uc\_max is the maximum number of values that SRC proposes to DST to process. [cite: 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101]
+        
+        When the DST application receives this frame, it responds by sending:
+        
+        WORK\_AVAILABILITY = TRANSFERT(1) (BYTE) 5 (BYTE) id\_dst (ID) id\_src (ID) request\_id (LONG) nb\_uc (LONG)
+        
+        where:
+        
+        -   id\_src is the identifier of the ID\_SRC application; [cite: 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101]
+        -   id\_dst is the identifier of the ID\_DST application; [cite: 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101]
+        -   request\_id is the request identifier found in the WORK\_REQUEST frame; [cite: 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101]
+        -   nb\_uc (LONG) is the number of calculations. [cite: 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101] This number must be between 0 and nb\_uc\_max. [cite: 93, 94, 95, 96, 97, 98, 99, 100, 101] It can be 0 to signify that this application cannot perform calculations at the moment. [cite: 93, 94, 95, 96, 97, 98, 99, 100, 101]
+        
+        After receiving this response, the SRC application can assign calculations to the DST application with the following frame:
+        
+        WORK\_ASSIGNEMENT = TRANSFERT(1) (BYTE) 6 (BYTE) id\_dst (ID) id\_src (ID) request\_id (LONG) range (RANGE)
+        
+        -   id\_src is the identifier of the ID\_SRC application; [cite: 95, 96, 97, 98, 99, 100, 101]
+        -   id\_dst is the identifier of the ID\_DST application; [cite: 95, 96, 97, 98, 99, 100, 101]
+        -   request\_id is the identifier of the request corresponding to the WORK\_RESPONSE. [cite: 95, 96, 97, 98, 99, 100, 101]
+        
+        When the DST application receives this frame, it must perform the corresponding calculations on the checker and return the responses as indicated in section 5.4. [cite: 96, 97, 98, 99, 100, 101]
+        
+    **3.2.3. Calculation Responses**
+    
+        A response to a calculation will be composed of the tested value LONG, a signed byte (BYTE) indicating whether the response could be calculated, and if the calculation could be performed, the string (STRING) returned by the checker. [cite: 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109]
+        
+        RESPONSE = value (LONG) 0 (BYTE) response (STRING)
+        
+        |
+        
+        value (LONG) 1 (BYTE) // checker raised an exception [cite: 97, 98, 99, 100, 101]
+        
+        |
+        
+        value (LONG) 2 (BYTE) // checker exceeded the allocated time [cite: 97, 98, 99, 100, 101]
+        
+        |
+        
+        value (LONG) 3 (BYTE) // the checker could not be retrieved [cite: 97, 98, 99, 100, 101]
+        
+        To return the response to a calculation performed for an application with identifier id\_dst, within the framework of a request with identifier id\_request, the application with identifier id\_src will send the frame:
+        
+        WORK\_RESPONSE = TRANSFERT(1) (BYTE) 7 (BYTE) id\_src (ID) id\_dst (ID) request\_id (LONG) response (RESPONSE) [cite: 101, 102, 103, 104, 105, 106, 107, 108, 109]
+        
+**3.3. Application Disconnection**
+
+    The protocol only manages the planned disconnection of CONNECTED applications. [cite: 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114] So we will consider the situation of an application D that has a parent application M and child applications F1, ..., Fk. [cite: 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114]
+    
+    M
+    
+    |
+    
+    +----+----+--------+
+    
+    | | |
+    
+    D ... ...
+    
+    |
+    
+    +--+---+
+    
+    | |
+    
+    F1 Fk
+    
+    To manage concurrency problems related to several simultaneous disconnections, the disconnection will be orchestrated by the parent application M. [cite: 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125]
+    
+    We will present the disconnection from the point of view of:
+    
+    -   the application D; [cite: 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125]
+    -   the parent application M; [cite: 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125]
+    -   the child applications Fi; [cite: 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125]
+    -   the rest of the network. [cite: 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125]
+        
+    **3.3.1. Disconnection as Seen by the Application Attempting to Disconnect (CHILD)**
+    
+        If a CONNECTED application with identifier id wants to disconnect from the network, it must follow these steps
+        

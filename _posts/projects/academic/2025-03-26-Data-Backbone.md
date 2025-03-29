@@ -24,4 +24,6 @@ Config l'environnement de test pour tester la recherche de liens avec une BDD de
 
 # Code coverage metrics
 
+![Composite code coverage metric calculated by DeepSource](/assets/projects/academic/Data-Backbone/images/Composite_code_coverage_metric.png "Composite code coverage metric calculated by DeepSource")
+
 ...

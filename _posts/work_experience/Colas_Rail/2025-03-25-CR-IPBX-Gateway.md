@@ -11,6 +11,8 @@ excerpt: A secured gateway to monitor an Asterisk IP PBX system and SIP devices 
 tags: WIP Software-Engineering Python SQLAlchemy OPCUA SIP Asterisk FreePBX AMI Cybersecurity Linux
 ---
 
+# IP PBX Architecture
+
 # Initiate remote phone calls from a SCADA system
 
 ...
