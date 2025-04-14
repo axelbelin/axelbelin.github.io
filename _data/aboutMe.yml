@@ -1,6 +1,43 @@
 name: Axel BELIN
-job: Software Engineer
-currentJob: Technical studies Engineer at Colas Rail, Member of the IT design office, full-time employee
+
+function: software engineer
+
+interests:
+  - Cybersecurity
+  - Data engineering
+  - Cloud computing
+  - Mobile application development
+  - System programming
+  - Virtualization
+  - DevOps
+  - Machine learning
+  - Internet of Things (IoT)
+  - Robotics
+
+diplomas:
+  - id: engineering-diploma
+    name: Engineering Master degree with a major in software engineering
+    type: work-study program
+    school: ESIEE Paris
+    university: Gustave Eiffel university
+  - id: dut-diploma
+    name: TODO DUT Info ....
+    type: ...
+    school: ...
+    university: ...
+
+jobs:
+  - current: true
+    title: technical studies engineer
+    company: Colas Rail
+    team: IT design office
+    type: full-time employee
+  - current: false
+    title: software engineer apprentice
+    company: Colas Rail
+    team: IT design office
+    type: Apprentice
+
 languages:
   - language:
     - name: French
@@ -11,28 +48,50 @@ languages:
   - language:
     - name: Spanish
     - level: Intermediate
+
 contactInfo:
   - linkedin: linkedin.com/in/axel-belin
+
 repositories:
   - gitLab: gitlab.com/AxelBelin
+
 technicalSkills:
-  - programmingLanguages:
-    - Java
-    - Python
-    - C
-    - C++
-    - Kotlin
-    - Swift
-    - JavaScript
-    - Bash
-  - fullStackDevelopment:
-    - TODO ....
-  - mobileAppDevelopment:
-    - android:
+  - type: programmingLanguages
+    levels:
+      - level: expert
+        names:
+          - Java
+          - Python
+      - level: proficient
+        names:
+          - C
+          - C++
+          - Kotlin
+          - Swift
+          - JavaScript
+          - Bash
+
+  - type: fullStackDevelopment # TODO ....
+
+  - type: mobileAppDevelopment
+    android:
       - Jetpack Compose
       - Android Legacy
-    - ios: UIKit
-  - systemProgramming: Linux
-  - virtualization:
-    - Docker
-    - Proxmox
+    ios:
+      - UIKit
+
+  - type: systemProgramming
+    names:
+      - Linux
+
+  - type: virtualization
+    names:
+      - Docker
+      - Proxmox
+
+  - type: infrastructure
+    names: # TODO ....
+      - Terraform
+      - Ansible
+
+  - type: siteReliability # TODO ....
