@@ -16,3 +16,12 @@ You can find the source code for Jekyll at GitHub:
 
 
 [jekyll-organization]: https://github.com/jekyll
+
+-------
+# Pourquoi je veux travailler en Amérique du Nord ?
+Je suis passionné par l'informatique et la technologie, et je suis convaincu que l'Amérique du Nord est le meilleur endroit pour développer mes compétences et ma carrière dans ce domaine. Je suis particulièrement attiré par la culture d'innovation et de collaboration qui règne dans cette région, ainsi que par les opportunités professionnelles qu'elle offre. Je suis également fasciné par la diversité culturelle et les valeurs d'ouverture d'esprit qui caractérisent l'Amérique du Nord.
+Je suis convaincu que travailler dans un environnement aussi dynamique et stimulant me permettra de m'épanouir professionnellement et personnellement. Je suis impatient de relever de nouveaux défis et d'apprendre auprès de professionnels talentueux et passionnés.
+
+
+
+En effet, ayant eu l'opportunité d'étudier pendant environ 5 mois dans une université canadienne et de voyager aux USA, j'ai été séduit par le lifestyle, .... et ....

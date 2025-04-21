@@ -27,16 +27,14 @@ diplomas:
     university: ...
 
 jobs:
-  - current: true
-    title: technical studies engineer
-    company: Colas Rail
-    team: IT design office
-    type: full-time employee
-  - current: false
-    title: software engineer apprentice
-    company: Colas Rail
-    team: IT design office
-    type: Apprentice
+    - title: technical studies engineer
+      company: Colas Rail
+      team: IT design office
+      type: full-time employee
+    - title: IT engineer apprentice
+      company: Colas Rail
+      team: IT design office
+      type: Apprentice
 
 languages:
   - language:
