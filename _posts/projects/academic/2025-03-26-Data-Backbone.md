@@ -3,6 +3,7 @@
 
 title: Data-Backbone - Search for similarities between datasets across various databases
 date: 2025-03-26 16:57:12 +0100
+period: 2024-02 to 2024-03
 categories: Projects Academic Opus-Numeris
 excerpt: A web application to search for data similarities between datasets and visualize them as links between multiple databases.
 

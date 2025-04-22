@@ -3,6 +3,7 @@
 
 title: An Indoor Positioning system based on UWB antennas
 date: 2025-03-26 16:23:12 +0100
+period: 2021-03 to 2021-06
 categories: Work-experience Poskast
 excerpt: Wrote technical documentation of three STM32 cards' firmware communicating using UWB.
 

@@ -3,6 +3,7 @@
 
 title: Cybersecurity background
 date: 2025-03-26 00:27:12 +0100
+period: 2022-03 to now
 categories: Cybersecurity
 excerpt: An overview of my professionnal, academic and personnal background in cybersecurity
 ---

@@ -3,6 +3,7 @@
 
 title: Asterisk OPC UA Gateway
 date: 2025-03-26 00:27:12 +0100
+period: 2024-04 to 2024-06
 categories: Work-experience Colas-Rail
 excerpt: A secured gateway to monitor an Asterisk IP PBX system and SIP devices from a SCADA through OPC UA
 

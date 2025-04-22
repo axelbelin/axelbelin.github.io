@@ -69,6 +69,6 @@ After nearly four years with this company, I’m looking for a new environment a
 - I'm highly skilled in {{ expertProgrammingLanguagesStr }}, and proficient in {{ proficientProgrammingLanguagesStr }}.
 - I'm used to work with Linux based environment within virtualized infrastructures built on {{ virtualizationSkillsStr }}.
 
-I’m a fast learner and I’m able to adapt quickly to new technologies and environments. In fact, I’m improving my knowledge whenever I can, especially by developing skills as part of the projects I’m contributing.
+I’m a fast learner able to adapt quickly to new technologies and environments. In fact, I’m improving my knowledge whenever I can, especially by developing skills as part of the projects I’m contributing.
 
 ## Take a look at my Posts below to read more about my experience:
