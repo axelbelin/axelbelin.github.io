@@ -14,8 +14,12 @@ This page shows an overview of my experiences involving cybersecurity knowledge 
 
 # CTF
 
-# WORK EXPERIENCE
+# Work Experience
 
-# ACADEMIC PROJECTS AND PRACTICAL WORKS
+## Colas Rail
+
+### Enhancing the cybersecurity of a unified communications system - Apr to Sept 2024
+
+# Academic projects and practical works
 
 ...
